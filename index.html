@@ -10,23 +10,27 @@
   h1 { font-size: 26px; margin: 0 0 8px; }
   p { color: #5a626e; margin: 0 0 20px; line-height: 1.45; }
   .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; margin-bottom: 24px; }
-  a.team { display: block; padding: 18px 16px; border-radius: 12px; background: #fff; border: 1px solid #d5dbe3; color: #16191f; text-decoration: none; font-weight: 600; font-size: 18px; }
-  a.team:hover, a.team:focus { border-color: #2f6fd6; outline: none; }
+  .team { padding: 16px; border-radius: 12px; background: #fff; border: 1px solid #d5dbe3; }
+  .team b { display: block; font-size: 18px; margin-bottom: 10px; }
+  .team a { display: block; padding: 10px 12px; border-radius: 9px; text-decoration: none; font-weight: 600; margin-top: 6px; text-align: center; }
+  .team a.app { background: #1e9e6a; color: #fff; }
+  .team a.rep { background: #eef1f4; color: #16191f; }
+  .team a:hover, .team a:focus { outline: 2px solid #2f6fd6; }
   a.plain { color: #2f6fd6; }
 </style>
 </head>
 <body>
 <div class="wrap">
   <h1>Баг-бэш: запись на консультацию</h1>
-  <p>У каждой команды свой вариант приложения со своим набором дефектов. Откройте вариант своей команды, сверяйтесь с <a class="plain" href="https://github.com/sink3x/pd-bug-bash/blob/main/USER_STORIES.md">критериями приёмки</a> и записывайте дефекты по <a class="plain" href="https://github.com/sink3x/pd-bug-bash/blob/main/BUG_REPORT_TEMPLATE.md">шаблону</a>.</p>
+  <p>У каждой команды свой вариант приложения со своим набором дефектов. Откройте вариант своей команды, сверяйтесь с <a class="plain" href="https://github.com/sink3x/pd-bug-bash/blob/main/USER_STORIES.md">критериями приёмки</a> и записывайте дефекты в лист баг-репортов своей команды. Когда время выйдет, скопируйте отчёт и отправьте его в чат группы.</p>
   <div class="grid">
-      <a class="team" href="t1/">Команда 1</a>
-      <a class="team" href="t2/">Команда 2</a>
-      <a class="team" href="t3/">Команда 3</a>
-      <a class="team" href="t4/">Команда 4</a>
-      <a class="team" href="t5/">Команда 5</a>
-      <a class="team" href="t6/">Команда 6</a>
-      <a class="team" href="t7/">Команда 7</a>
+      <div class="team"><b>Команда 1</b><a class="app" href="t1/">Открыть приложение</a><a class="rep" href="report/?team=1">Лист баг-репортов</a></div>
+      <div class="team"><b>Команда 2</b><a class="app" href="t2/">Открыть приложение</a><a class="rep" href="report/?team=2">Лист баг-репортов</a></div>
+      <div class="team"><b>Команда 3</b><a class="app" href="t3/">Открыть приложение</a><a class="rep" href="report/?team=3">Лист баг-репортов</a></div>
+      <div class="team"><b>Команда 4</b><a class="app" href="t4/">Открыть приложение</a><a class="rep" href="report/?team=4">Лист баг-репортов</a></div>
+      <div class="team"><b>Команда 5</b><a class="app" href="t5/">Открыть приложение</a><a class="rep" href="report/?team=5">Лист баг-репортов</a></div>
+      <div class="team"><b>Команда 6</b><a class="app" href="t6/">Открыть приложение</a><a class="rep" href="report/?team=6">Лист баг-репортов</a></div>
+      <div class="team"><b>Команда 7</b><a class="app" href="t7/">Открыть приложение</a><a class="rep" href="report/?team=7">Лист баг-репортов</a></div>
   </div>
   <p><a class="plain" href="demo/">Общий вариант для показа на проекторе</a></p>
 </div>
