@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Запись на консультацию</title>
+<style>
+  :root { --ink: #16191f; --muted: #5a626e; --line: #d5dbe3; --bg: #eef1f4; --ok: #1e9e6a; --err: #dc3d43; --accent: #2f6fd6; }
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 24px 16px 48px; font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; color: var(--ink); background: var(--bg); }
+  h1 { font-size: 24px; margin: 0 0 4px; }
+  h2 { font-size: 18px; margin: 0 0 12px; }
+  p.lead { margin: 0 0 20px; color: var(--muted); }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  .card { width: 520px; background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 20px; margin-bottom: 20px; }
+  label { display: block; font-size: 14px; color: var(--muted); margin: 12px 0 4px; }
+  input, select { width: 100%; font: inherit; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; background: #fff; color: var(--ink); }
+  button { font: inherit; border: 0; border-radius: 8px; padding: 10px 16px; cursor: pointer; }
+  button.primary { background: var(--accent); color: #fff; margin-top: 16px; }
+  button.ghost { background: var(--bg); color: var(--ink); }
+  button.link { background: none; color: var(--err); padding: 4px 0; }
+  .msg { margin-top: 12px; min-height: 22px; font-weight: 600; }
+  .msg.ok { color: var(--ok); }
+  .msg.err { color: var(--err); }
+  .row { display: flex; gap: 12px; align-items: center; justify-content: space-between; }
+  table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+  th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+  th { font-size: 13px; color: var(--muted); font-weight: 600; }
+  .empty { color: var(--muted); padding: 12px 0; }
+  footer { color: var(--muted); font-size: 13px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Запись на консультацию</h1>
+  <p class="lead" style="margin-bottom:4px"><b>Вариант команды 5</b></p>
+  <p class="lead">Консультации по проекту: будни, слоты 9:00, 11:00, 14:00 и 16:00, до 2 человек в слоте.</p>
+
+  <div class="card">
+    <h2>Записаться</h2>
+    <form id="form" novalidate>
+      <label for="name">Имя и фамилия</label>
+      <input id="name" autocomplete="off" placeholder="Анна Смирнова">
+      <label for="group">Группа</label>
+      <input id="group" autocomplete="off" placeholder="УВП-211">
+      <label for="date">Дата</label>
+      <input id="date" type="date">
+      <label for="time">Время</label>
+      <select id="time"></select>
+      <button class="primary" type="submit" id="submit">Записаться</button>
+      <div class="msg" id="msg" role="status"></div>
+    </form>
+  </div>
+
+  <div class="card">
+    <div class="row">
+      <h2 style="margin:0">Записи</h2>
+      <span id="counter">Всего записей: 0</span>
+    </div>
+    <label for="search">Поиск по имени</label>
+    <input id="search" autocomplete="off" placeholder="Начните вводить имя">
+    <div id="list"></div>
+    <div class="row" style="margin-top:16px">
+      <span></span>
+      <button class="ghost" type="button" id="reset">Очистить все записи</button>
+    </div>
+  </div>
+
+  <footer>Учебное приложение курса «Проектная деятельность». В нём намеренно оставлены дефекты. Данные хранятся только в вашем браузере.</footer>
+</div>
+
+<script>
+  const KEY = 'pd-bug-bash-c2c3i1i4i5m1m3m5';
+  const SLOTS = ['9:00', '11:00', '14:00', '16:00'];
+  const el = (id) => document.getElementById(id);
+
+  let bookings = JSON.parse(localStorage.getItem(KEY) || '[]');
+  let total = bookings.length;
+  let nextId = bookings.reduce((m, b) => Math.max(m, b.id || 0), 0) + 1;
+
+  SLOTS.forEach((s) => {
+    const o = document.createElement('option');
+    o.value = s; o.textContent = s;
+    el('time').appendChild(o);
+  });
+
+  function save() {
+    localStorage.setItem(KEY, JSON.stringify(bookings));
+  }
+
+  function say(text, kind) {
+    el('msg').textContent = text;
+    el('msg').className = 'msg ' + kind;
+  }
+
+  function sorted(list) {
+    return list.slice().sort((a, b) => a.date.localeCompare(b.date) || SLOTS.indexOf(a.time) - SLOTS.indexOf(b.time));
+  }
+
+  function formatDate(iso) {
+    const [y, m, d] = iso.split('-');
+    return d + '.' + m + '.' + y;
+  }
+
+  function esc(text) {
+    return String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  function render() {
+    const q = el('search').value.trim().toLowerCase();
+    const rows = sorted(bookings).filter((b) => b.name.toLowerCase().includes(q));
+    el('counter').textContent = 'Всего записей: ' + total;
+    if (rows.length === 0) {
+      el('list').innerHTML = '<div class="empty">Записей нет</div>';
+      return;
+    }
+    let html = '<table><tr><th>Дата</th><th>Время</th><th>Имя</th><th>Группа</th><th></th></tr>';
+    rows.forEach((b, i) => {
+      html += '<tr><td>' + formatDate(b.date) + '</td><td>' + b.time + '</td><td>' + esc(b.name) + '</td><td>' + esc(b.group) +
+        '</td><td><button class="link" type="button" data-i="' + i + '">Отменить</button></td></tr>';
+    });
+    el('list').innerHTML = html + '</table>';
+  }
+
+  el('form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const name = el('name').value;
+    const group = el('group').value.trim();
+    const date = el('date').value;
+    const time = el('time').value;
+
+    if (name.length < 2) return say('Введите имя и фамилию', 'err');
+    if (!date) return say('Выберите дату', 'err');
+    const now = new Date();
+    const today = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
+    if (date <= today) return say('Записаться можно начиная с завтрашнего дня', 'err');
+    const day = new Date(date + 'T00:00').getDay();
+    if (day === 6 || day === 0) return say('Консультации проходят только в будни', 'err');
+
+    const taken = bookings.filter((b) => b.date === date && b.time === time).length;
+    if (taken >= 2) return say('Слот занят, выберите другое время', 'err');
+
+    say('Вы записаны', 'ok');
+    if (!group) return;
+
+    bookings.push({ id: nextId++, name, group, date, time });
+    total = total + 1;
+    save();
+    render();
+  });
+
+  el('list').addEventListener('click', (e) => {
+    const i = e.target.dataset.i;
+    if (i === undefined) return;
+    bookings.splice(Number(i), 1);
+    save();
+    render();
+  });
+
+  el('search').addEventListener('input', () => {
+    if (el('search').value === '') return;
+    render();
+  });
+
+  el('reset').addEventListener('click', () => {
+    bookings = [];
+    total = 0;
+    save();
+    render();
+    say('', '');
+  });
+
+  render();
+</script>
+</body>
+</html>
